@@ -2,6 +2,7 @@ import random
 import time
 import tkinter
 
+
 #Step 1. создание игрового поля
 window = tkinter.Tk()
 window.geometry('500x500')
@@ -36,6 +37,7 @@ queen_take = []
 
 #Поиск текущих возможных ходов
 def moves_bot(position):
+    print("Гений начал работать")
     global matrixArea
     matrixArea = [[[], [], [], [], [], [], [], []],
                   [[], [], [], [], [], [], [], []],
@@ -174,7 +176,7 @@ def moves_bot(position):
                             break
                         iD -= 1
                         jD += 1
-
+    print("Гений отработал")
     if color2 == "black":
         for i in range(len(position)):
             for j in range(len(position[i])):
@@ -351,9 +353,24 @@ def bot_level_1():
         moves_bot(area)
         for i in range(len(matrixArea)):
             for j in range(len(matrixArea[i])):
-                if matrixArea[i][j] != [] and area[i][j] == 2:
+                if matrixArea[i][j] != [] and area[i][j] == 2 or area[i][j] == 22:
                     forLevel1.append([[i, j], matrixArea[i][j]])
+            print(matrixArea[i])
         hod = random.choice(forLevel1)
+        print(hod)
+        fr1 = hod[0]
+        to1 = random.choice(hod[1])
+        move_bot(fr1, to1)
+    else:
+        print("taking: ", taking)
+        moves_bot(area)
+        for i in range(len(matrixArea)):
+            for j in range(len(matrixArea[i])):
+                if matrixArea[i][j] != [] and area[i][j] == 2 or area[i][j] == 22:
+                    forLevel1.append([[i, j], matrixArea[i][j]])
+            print(matrixArea[i])
+        hod = random.choice(forLevel1)
+        print(hod)
         fr1 = hod[0]
         to1 = random.choice(hod[1])
         move_bot(fr1, to1)
@@ -637,10 +654,15 @@ def motion2(event):
         for j in range(len(coords[i])):
             if abs((coords[i][j][0]+coords[i][j][2])//2 - event.x) < 25 and abs((coords[i][j][1]+coords[i][j][3])//2 - event.y) < 25:
                 if(area[i][j] == 0 and [i,j] in fr[-1] and chose and abs(i - fr[0][0]) == 2 and abs(j - fr[0][1]) == 2) and area[(i+fr[0][0])//2][(j+fr[0][1])//2]==2:
-                    area[i][j] = 1
-                    area[(i + fr[0][0]) // 2][(j + fr[0][1]) // 2] = 0
-                    global done
-                    done = True
+                    if i == 0 or i == 7:
+                        area[i][j] = 11
+                        area[(i + fr[0][0]) // 2][(j + fr[0][1]) // 2] = 0
+                        global done
+                        done = True
+                    else:
+                        area[i][j] = 1
+                        area[(i + fr[0][0]) // 2][(j + fr[0][1]) // 2] = 0
+                        done = True
                 elif area[i][j] == 0 and [i,j] in fr[-1] and chose and abs(i - fr[0][0])==1 and abs(j - fr[0][1])==1:
                     area[i][j] = 1
                     done = True
@@ -660,9 +682,6 @@ done = False
 chose = False
 canvas.bind('<Button-1>', motion1)
 canvas.bind('<Double-1>', motion2)
-button = tkinter.Button(text = "Обновить")
-button.config(command = draw)
-button.pack()
 while True:
     done = False
     chose = False
@@ -673,8 +692,11 @@ while True:
     while not done:
         time.sleep(0.5)
         canvas.update()
+    canvas.update()
     fr = []
+    print("Сейчас ходит бот")
     bot_level_1()
+    print("Бот походил")
     draw(area)
     canvas.update()
 #    clear()
