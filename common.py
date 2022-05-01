@@ -1,6 +1,4 @@
-import random
-import time
-import tkinter
+import random, tkinter, time
 
 
 #Step 1. создание игрового поля
@@ -30,14 +28,130 @@ matrixArea = [[[],[],[],[],[],[],[],[]],
 color1 = "white"
 color2 = "black" # цвет шашек для бота
 actual_moves = []
-taking = []
+taking = [[[], [],[], [], [], [], [], []],
+        [[], [], [], [], [], [], [], []],
+        [[], [], [], [], [], [], [], []],
+        [[], [], [], [], [], [], [], []],
+        [[], [], [], [], [], [], [], []],
+        [[], [], [], [], [], [], [], []],
+        [[], [], [], [], [], [], [], []],
+        [[], [], [], [], [], [], [], []]]
 nes_take = []
 queen = []
 queen_take = []
 
+def moves_bot(position, color):
+    global matrixArea, taking
+    matrixArea = [[[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []]]
+    taking = [[[], [], [], [], [], [], [], []],
+              [[], [], [], [], [], [], [], []],
+              [[], [], [], [], [], [], [], []],
+              [[], [], [], [], [], [], [], []],
+              [[], [], [], [], [], [], [], []],
+              [[], [], [], [], [], [], [], []],
+              [[], [], [], [], [], [], [], []],
+              [[], [], [], [], [], [], [], []]]
+    if color == "white":
+        for i in range(len(position)):
+            for j in range(len(position[i])):
+                if position[i][j] == 1:
+                    if i - 1 >= 0 and j - 1 >= 0:
+                        if position[i - 1][j - 1] == 0:
+
+                            matrixArea[i][j].append([i - 1, j - 1])
+
+                        elif position[i - 1][j - 1] == 2:
+                            if i - 2 >= 0 and j - 2 >= 0:
+                                if position[i - 2][j - 2] == 0:
+
+                                    taking[i][j].append([i - 2, j - 2])
+
+                                    matrixArea[i][j].append([i - 2, j - 2])
+
+                    if i - 1 >= 0 and j + 1 < 8:
+                        if position[i - 1][j + 1] == 0:
+
+                            matrixArea[i][j].append([i - 1, j + 1])
+
+                        elif position[i - 1][j + 1] == 2:
+                            if i - 2 >= 0 and j + 2 < 8:
+                                if position[i - 2][j + 2] == 0:
+                                    taking[i][j].append([i - 2, j + 2])
+
+                                    matrixArea[i][j].append([i - 2, j + 2])
+
+                    # Проверка на возможность взятия назад
+                    if i + 1 < 8 and j - 1 >= 0:
+                        if position[i + 1][j - 1] == 2 or position[i + 1][j - 1] == 22:
+                            if i + 2 < 8 and j - 2 >= 0:
+                                if position[i + 2][j - 2] == 0:
+                                    taking[i][j].append([i + 2, j - 2])
+
+                                    matrixArea[i][j].append([i + 2, j - 2])
+
+                    if i + 1 < 8 and j + 1 < 8:
+                        if position[i + 1][j + 1] == 2 or position[i + 1][j + 1] == 22:
+                            if i + 2 < 8 and j + 2 < 8:
+                                if position[i + 2][j + 2] == 0:
+                                    taking[i][j].append([i + 2, j + 2])
+
+                                    matrixArea[i][j].append([i + 2, j + 2])
+
+    if color == "black":
+        for i in range(len(position)):
+            for j in range(len(position[i])):
+                if position[i][j] == 2:
+                    if i + 1 < 8 and j - 1 >= 0:
+                        if position[i + 1][j - 1] == 0:
+
+                            matrixArea[i][j].append([i + 1, j - 1])
+
+
+                        elif position[i + 1][j - 1] == 1:
+                            if i + 2 < 8 and j - 2 >= 0:
+                                if position[i + 2][j - 2] == 0:
+
+                                    taking[i][j].append([i + 2, j - 2])
+
+                                    matrixArea[i][j].append([i + 2, j - 2])
+
+                    if i + 1 < 8 and j + 1 < 8:
+                        if position[i + 1][j + 1] == 0:
+
+                            matrixArea[i][j].append([i + 1, j + 1])
+
+                        elif position[i + 1][j + 1] == 1:
+                            if i + 2 < 8 and j + 2 < 8:
+                                if position[i + 2][j + 2] == 0:
+
+                                    taking[i][j].append([i + 2, j + 2])
+
+                                    matrixArea[i][j].append([i + 2, j + 2])
+
+                    # Проверка на возможность взятия назад
+                    if i - 1 >= 0 and j - 1 >= 0:
+                        if position[i - 1][j - 1] == 1 or position[i - 1][j - 1] == 11:
+                            if i - 2 >= 0 and j - 2 >= 0:
+                                if position[i - 2][j - 2] == 0:
+                                    taking[i][j].append([i - 2, j - 2])
+                                    matrixArea[i][j].append([i - 2, j - 2])
+
+                    if i - 1 >= 0 and j + 1 < 8:
+                        if position[i - 1][j + 1] == 1 or position[i - 1][j + 1] == 11:
+                            if i - 2 >= 0 and j + 2 < 8:
+                                if position[i - 2][j + 2] == 0:
+                                    taking[i][j].append([i - 2, j + 2])
+
+                                    matrixArea[i][j].append([i - 2, j + 2])
 #Поиск текущих возможных ходов
-def moves_bot(position):
-    print("Гений начал работать")
+def moves_bot1(position, color):
     global matrixArea
     matrixArea = [[[], [], [], [], [], [], [], []],
                   [[], [], [], [], [], [], [], []],
@@ -47,7 +161,7 @@ def moves_bot(position):
                   [[], [], [], [], [], [], [], []],
                   [[], [], [], [], [], [], [], []],
                   [[], [], [], [], [], [], [], []]]
-    if color1 == "white":
+    if color == "white":
         for i in range(len(position)):
             for j in range(len(position[i])):
                 if position[i][j] == 1:
@@ -176,8 +290,7 @@ def moves_bot(position):
                             break
                         iD -= 1
                         jD += 1
-    print("Гений отработал")
-    if color2 == "black":
+    if color == "black":
         for i in range(len(position)):
             for j in range(len(position[i])):
                 if position[i][j] == 2:
@@ -307,7 +420,99 @@ def moves_bot(position):
                         iD -= 1
                         jD += 1
 
-def move_bot(Fr, To):
+def move_bot(fr, to):
+    if abs(fr[0] - to[0]) == 1 and abs(fr[1] - to[1]) == 1:
+        iFr = fr[0]
+        jFr = fr[1]
+        iTo = to[0]
+        jTo = to[1]
+        area[iTo][jTo] = area[iFr][jFr]
+        area[iFr][jFr] = 0
+
+
+    elif abs(fr[0] - to[0]) == 2 and abs(fr[1] - to[1]) == 2:
+        iFr = fr[0]
+        jFr = fr[1]
+        iTo = to[0]
+        jTo = to[1]
+        area[iTo][jTo] = area[iFr][jFr]
+        area[iFr][jFr] = 0
+        area[abs((iTo + iFr)) // 2][abs((jTo + jFr)) // 2] = 0
+
+    if iTo == 0:
+        area[iTo][jTo] = 11
+
+    if iTo == 7:
+        area[iTo][jTo] = 22
+
+    return True
+
+# Функция бота 1 уровня, делающего обязательные взятия и рандомные ходы
+def bot_level_1():
+    time.sleep(0.3)
+    global matrixArea
+    matrixArea = [[[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []],
+                  [[], [], [], [], [], [], [], []]]
+    forLevel1 = []
+    isTake = False
+    ask = take_go()
+
+    if ask == "No":
+        moves_bot(area, "black")
+        for i in range(len(matrixArea)):
+            for j in range(len(matrixArea[i])):
+                if matrixArea[i][j] != [] and area[i][j] == 2 or area[i][j] == 22:
+                    forLevel1.append([[i, j], matrixArea[i][j]])
+            print(matrixArea[i])
+        hod = random.choice(forLevel1)
+        print(hod)
+        fr1 = hod[0]
+        to1 = random.choice(hod[1])
+        move_bot(fr1, to1)
+
+# Функция для обязательного взятия
+def take_go():
+    moves_bot(area, "black")
+    count = 0
+    isStop = True
+    for i in range(len(taking)):
+        for j in range(len(taking[i])):
+            if taking[i][j] != []:
+                take = taking[i][j][0]
+                iTo = take[0]
+                jTo = take[1]
+                area[iTo][jTo] = area[i][j]
+                area[i][j] = 0
+                area[abs((iTo + i)) // 2][abs((jTo + j)) // 2] = 0
+                isStop = False
+                count += 1
+                break
+
+    if isStop and count == 0:
+        # Взятий не было
+        return "No"
+    elif isStop and count != 0:
+        # Взятия были
+        return "Yes"
+    elif not isStop and count != 0:
+        # Пытаемся продолжить брать
+        for i in range(len(taking)):
+            for j in range(len(taking[i])):
+                taking[i][j] = []
+        for i in range(len(matrixArea)):
+            for j in range(len(matrixArea[i])):
+                matrixArea[i][j] = []
+        moves_bot(area, "black")
+        take_go()
+
+#ход бота
+def move_bot1(Fr, To):
     if abs(Fr[0] - To[0]) == 1 and abs(Fr[1] - To[1]) == 1:
         iFr = Fr[0]
         jFr = Fr[1]
@@ -338,7 +543,7 @@ def move_bot(Fr, To):
 
 # Без учёта условия обязательного взятия
 
-def bot_level_1():
+def bot_level_1_1():
     global matrixArea, area
     matrixArea = [[[], [], [], [], [], [], [], []],
                   [[], [], [], [], [], [], [], []],
@@ -350,7 +555,7 @@ def bot_level_1():
                   [[], [], [], [], [], [], [], []]]
     forLevel1 = []
     if taking == []:
-        moves_bot(area)
+        moves_bot(area, "black")
         for i in range(len(matrixArea)):
             for j in range(len(matrixArea[i])):
                 if matrixArea[i][j] != [] and area[i][j] == 2 or area[i][j] == 22:
@@ -363,7 +568,7 @@ def bot_level_1():
         move_bot(fr1, to1)
     else:
         print("taking: ", taking)
-        moves_bot(area)
+        moves_bot(area, "black")
         for i in range(len(matrixArea)):
             for j in range(len(matrixArea[i])):
                 if matrixArea[i][j] != [] and area[i][j] == 2 or area[i][j] == 22:
@@ -628,7 +833,17 @@ def draw(lst):
             elif area[i][j] == 1:
                 ci = canvas.create_oval(coords[i][j][0]+5,coords[i][j][1]+5, coords[i][j][2]-5, coords[i][j][3]-5, outline="white", fill="white", tags="white")
                 white_checkers.append(ci)
+            elif area[i][j] == 22:
+                black_checkers.append(canvas.create_oval(coords[i][j][0]+5,coords[i][j][1]+5,coords[i][j][2]-5,coords[i][j][3]-5, outline="red", fill="yellow", tags="yellow"))
+            elif area[i][j] == 11:
+                ci = canvas.create_oval(coords[i][j][0] + 5, coords[i][j][1] + 5, coords[i][j][2] - 5,
+                                        coords[i][j][3] - 5, outline="red", fill="white", tags="white")
+                white_checkers.append(ci)
+
+
     canvas.update()
+
+queen_q = False
 
 def motion1(event):
     global chose
@@ -636,8 +851,18 @@ def motion1(event):
         for j in range(len(coords[i])):
             if abs((coords[i][j][0]+coords[i][j][2])//2 - event.x) < 25 and abs((coords[i][j][1]+coords[i][j][3])//2 - event.y) < 25:
                 if(area[i][j] == 1 and not chose):
-                    moves_bot(area)
+                    moves_bot(area, "white")
                     if matrixArea[i][j] != []:
+                        chose = True
+                        fr.append([i, j])
+                        fr.append(matrixArea[i][j])
+                        print(fr)
+                        area[i][j] = 0
+                elif(area[i][j] == 11 and not chose):
+                    moves_bot(area, "white")
+                    if matrixArea[i][j] != []:
+                        global queen_q
+                        queen_q = True
                         chose = True
                         fr.append([i, j])
                         fr.append(matrixArea[i][j])
@@ -649,40 +874,98 @@ done = False
 
 def motion2(event):
     global chose
-    print(fr)
     for i in range(len(coords)):
         for j in range(len(coords[i])):
             if abs((coords[i][j][0]+coords[i][j][2])//2 - event.x) < 25 and abs((coords[i][j][1]+coords[i][j][3])//2 - event.y) < 25:
-                if(area[i][j] == 0 and [i,j] in fr[-1] and chose and abs(i - fr[0][0]) == 2 and abs(j - fr[0][1]) == 2) and area[(i+fr[0][0])//2][(j+fr[0][1])//2]==2:
-                    if i == 0 or i == 7:
+                if queen_q and [i, j] in fr[-1] and chose:
+                    if fr[0][0] < i and fr[0][1] < j:
+                        if area[i - 1][j - 1] == 2 or area[i - 1][j - 1] == 22:
+                            area[i - 1][j - 1] = 0
+                    elif fr[0][0] < i and fr[0][1] > j:
+                        if area[i - 1][j + 1] == 2 or area[i - 1][j + 1] == 22:
+                            area[i - 1][j + 1] = 0
+                    elif fr[0][0] > i and fr[0][1] < j:
+                        if area[i + 1][j - 1] == 2 or area[i + 1][j - 1] == 22:
+                            area[i + 1][j - 1] = 0
+                    elif fr[0][0] > i and fr[0][1] > j:
+                        if area[i + 1][j + 1] == 2 or area[i + 1][j + 1] == 22:
+                            area[i + 1][j + 1] = 0
+                    print(i, j)
+                    area[i][j] = 11
+                    global done
+                    done = True
+                elif [i,j] in fr[-1] and chose and abs(i - fr[0][0]) == 2:
+                    if i == 0:
                         area[i][j] = 11
                         area[(i + fr[0][0]) // 2][(j + fr[0][1]) // 2] = 0
-                        global done
                         done = True
                     else:
                         area[i][j] = 1
                         area[(i + fr[0][0]) // 2][(j + fr[0][1]) // 2] = 0
                         done = True
-                elif area[i][j] == 0 and [i,j] in fr[-1] and chose and abs(i - fr[0][0])==1 and abs(j - fr[0][1])==1:
-                    area[i][j] = 1
+                elif [i,j] in fr[-1] and chose and abs(i - fr[0][0]) == 1 and abs(j - fr[0][1])==1:
+                    if i == 0:
+                        area[i][j] = 11
+                    else:
+                        area[i][j] = 1
                     done = True
+
+                elif queen_q:
+                    area[fr[0][0]][fr[0][1]] = 11
+                    chose = False
                 else:
                     area[fr[0][0]][fr[0][1]] = 1
                     chose = False
+
     draw(area)
 
 def clear():
     for widget in frame.winfo_children():
         widget.destroy()
 
+def mark(position):
+    winWhite = False
+    winBlack = False
+    for i in range(len(position)):
+        if position[i].count(1) != 0 or position[i].count(11) != 0:
+            winWhite = True
+        if position[i].count(2) != 0 or position[i].count(22) != 0:
+            winBlack = True
+    if winWhite and not winBlack:
+        return "Белые победили"
+    elif not winWhite and winBlack:
+        return "Чёрные победили"
+    return "Null"
+
+buttons = []
+
+def choose_color():
+    global buttons
+    buttons.append(tkinter.Button(text = "Белые"))
+    buttons.append(tkinter.Button(text = "Чёрные"))
+    buttons[-1].pack()
+    buttons[-2].pack()
+
+def get_back():
+    for i in buttons:
+        i.pack_forget()
+
+
 #создание поля
 checkers_board()
 fr = []
+buttons = []
+buttons.append(tkinter.Button(text = "Против бота", command = lambda :[buttons[0].pack_forget(), buttons[1].pack_forget(),choose_color()]))
+buttons.append(tkinter.Button(text = "Против друга"))
+buttons.append(tkinter.Button(text = "Назад", command=lambda : [get_back(),buttons[0].pack(), buttons[1].pack(), buttons[2].pack()]))
+for item in buttons:
+    item.pack()
 done = False
 chose = False
 canvas.bind('<Button-1>', motion1)
 canvas.bind('<Double-1>', motion2)
-while True:
+while mark(area) == "Null":
+    queen_q = False
     done = False
     chose = False
     checkers_board()
@@ -699,6 +982,7 @@ while True:
     print("Бот походил")
     draw(area)
     canvas.update()
+print(mark(area))
 #    clear()
 
 window.mainloop()
