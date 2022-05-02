@@ -3,7 +3,7 @@ import random, tkinter, time
 
 #Step 1. создание игрового поля
 window = tkinter.Tk()
-window.geometry('500x500')
+window.geometry('500x700')
 frame = tkinter.Frame(window)
 canvas = tkinter.Canvas(window, height=500, width=500)
 label1 = tkinter.Label(text="Нажми левой кнопкой мыши на шашку, двойное нажатие на пустое поле - туда поставится шашка ")
@@ -537,7 +537,6 @@ def move_bot1(Fr, To):
     if iTo == 7:
         area[iTo][jTo] = 22
 
-    draw(area)
     return True
 
 
@@ -843,6 +842,26 @@ def draw(lst):
 
     canvas.update()
 
+def draw_reversed(lst):
+    white_checkers = []
+    black_checkers = []
+    for i in range(len(lst)):
+        for j in range(len(lst[i])):
+            if area[i][j] == 2:
+                black_checkers.append(canvas.create_oval(coords[i][j][0]+5,coords[i][j][1]+5,coords[i][j][2]-5,coords[i][j][3]-5, outline="white", fill="white", tags="white"))
+            elif area[i][j] == 1:
+                ci = canvas.create_oval(coords[i][j][0]+5,coords[i][j][1]+5, coords[i][j][2]-5, coords[i][j][3]-5, outline="yellow", fill="yellow", tags="yellow")
+                white_checkers.append(ci)
+            elif area[i][j] == 22:
+                black_checkers.append(canvas.create_oval(coords[i][j][0]+5,coords[i][j][1]+5,coords[i][j][2]-5,coords[i][j][3]-5, outline="red", fill="white", tags="white"))
+            elif area[i][j] == 11:
+                ci = canvas.create_oval(coords[i][j][0] + 5, coords[i][j][1] + 5, coords[i][j][2] - 5,
+                                        coords[i][j][3] - 5, outline="red", fill="yellow", tags="yellow")
+                white_checkers.append(ci)
+
+
+    canvas.update()
+
 queen_q = False
 
 def motion1(event):
@@ -868,7 +887,6 @@ def motion1(event):
                         fr.append(matrixArea[i][j])
                         print(fr)
                         area[i][j] = 0
-    draw(area)
 
 done = False
 
@@ -917,8 +935,6 @@ def motion2(event):
                     area[fr[0][0]][fr[0][1]] = 1
                     chose = False
 
-    draw(area)
-
 def clear():
     for widget in frame.winfo_children():
         widget.destroy()
@@ -937,12 +953,32 @@ def mark(position):
         return "Чёрные победили"
     return "Null"
 
+black = False
+white = False
+started = False
+
+def startedQ():
+    global started
+    started = True
+
+def finishedQ():
+    global started
+    started = False
+
+def blackQ():
+    global black
+    black = True
+
+def whiteQ():
+    global white
+    white = True
+
 buttons = []
 
 def choose_color():
     global buttons
-    buttons.append(tkinter.Button(text = "Белые"))
-    buttons.append(tkinter.Button(text = "Чёрные"))
+    buttons.append(tkinter.Button(text = "Белые", command = lambda : [whiteQ(),startedQ()]))
+    buttons.append(tkinter.Button(text = "Чёрные", command = lambda : [blackQ(),startedQ()]))
     buttons[-1].pack()
     buttons[-2].pack()
 
@@ -953,36 +989,67 @@ def get_back():
 
 #создание поля
 checkers_board()
+started = False
 fr = []
 buttons = []
 buttons.append(tkinter.Button(text = "Против бота", command = lambda :[buttons[0].pack_forget(), buttons[1].pack_forget(),choose_color()]))
 buttons.append(tkinter.Button(text = "Против друга"))
-buttons.append(tkinter.Button(text = "Назад", command=lambda : [get_back(),buttons[0].pack(), buttons[1].pack(), buttons[2].pack()]))
+buttons.append(tkinter.Button(text = "Назад", command=lambda : [get_back(),buttons[0].pack(), buttons[1].pack(), buttons[2].pack(), finishedQ()]))
 for item in buttons:
     item.pack()
 done = False
 chose = False
-canvas.bind('<Button-1>', motion1)
-canvas.bind('<Double-1>', motion2)
-while mark(area) == "Null":
-    queen_q = False
-    done = False
-    chose = False
+while not started and (not white or not black):
+    time.sleep(0.3)
+    canvas.update()
+if started and white:
     checkers_board()
+    canvas.bind('<Button-1>', motion1)
+    canvas.bind('<Double-1>', motion2)
     canvas.update()
-    draw(area)
-    canvas.update()
-    while not done:
-        time.sleep(0.5)
+    while mark(area) == "Null" and started:
+        queen_q = False
+        done = False
+        chose = False
+        checkers_board()
         canvas.update()
+        draw(area)
+        canvas.update()
+        while not done:
+            time.sleep(0.5)
+            canvas.update()
+        canvas.update()
+        fr = []
+        print("Сейчас ходит бот")
+        bot_level_1()
+        print("Бот походил")
+        draw(area)
+        canvas.update()
+    print(mark(area))
+elif started and black:
+    checkers_board()
+    canvas.bind('<Button-1>', motion1)
+    canvas.bind('<Double-1>', motion2)
     canvas.update()
-    fr = []
-    print("Сейчас ходит бот")
-    bot_level_1()
-    print("Бот походил")
-    draw(area)
-    canvas.update()
-print(mark(area))
+    draw_reversed(area)
+    while mark(area) == "Null" and started:
+        print("Сейчас ходит бот")
+        bot_level_1()
+        print("Бот походил")
+        draw(area)
+        canvas.update()
+        queen_q = False
+        done = False
+        chose = False
+        checkers_board()
+        canvas.update()
+        draw_reversed(area)
+        canvas.update()
+        while not done:
+            time.sleep(0.5)
+            canvas.update()
+        canvas.update()
+        fr = []
 #    clear()
 
 window.mainloop()
