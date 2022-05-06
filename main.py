@@ -1,463 +1,263 @@
-# Ру́сские ша́шки — традиционный и наиболее популярный вид шашек в России, странах бывшего СССР и в Израиле. Цель игры — лишить противника возможности хода
-# путём взятия или запирания всех его шашек (в обратных русских шашках цель противоположна — лишить себя возможности хода).
-#
-#
-# Набор шашек, типичный для стран бывшего СССР
-# Отличительные особенности:
-#
-# Шашки ходят только по клеткам тёмного цвета.
-# Доска расположена так, чтобы угловое поле внизу слева со стороны игрока было тёмным.
-# Простая шашка бьёт вперёд и назад, дамка ходит и бьёт на любое поле диагонали.
-# Во время боя простая шашка может превратиться в дамку и сразу продолжить бой по правилам дамки.
-# При наличии нескольких вариантов боя можно выбрать любой из них.
-import random
-
-area = [[0, 2, 0, 2, 0, 2, 0, 2],
-        [2, 0, 2, 0, 2, 0, 2, 0],
-        [0, 2, 0, 2, 0, 2, 0, 2],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 1, 0, 1, 0, 1, 0],
-        [0, 1, 0, 1, 0, 1, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0]]
-
-# Матрица ходов
-
-matrixArea = [[[], [],[], [], [], [], [], []],
-        [[], [], [], [], [], [], [], []],
-        [[], [], [], [], [], [], [], []],
-        [[], [], [], [], [], [], [], []],
-        [[], [], [], [], [], [], [], []],
-        [[], [], [], [], [], [], [], []],
-        [[], [], [], [], [], [], [], []],
-        [[], [], [], [], [], [], [], []]]
-
-# 1 - белая шашка, 11 - белая дамка
-# 2 - чёрная шашка, 22 - чёрная дамка
-
-
-# Функция проверки на конец игры
-# Стоит переделать, учитывая правило об отсутствии ходов и ничьи
-def mark(position):
-        winWhite = False
-        winBlack = False
-        for i in range(len(position)):
-                if position[i].count(1) != 0 or position[i].count(11) != 0:
-                        winWhite = True
-                if position[i].count(2) != 0 or position[i].count(22) != 0:
-                        winBlack = True
-        if winWhite and not winBlack:
-                return "Белые победили"
-        elif not winWhite and winBlack:
-                return "Чёрные победили"
-        return "Null"
-
-
-test_mark = [[0,1,1],[0,0,0]]
-#print(mark(test_mark)) # Успешно
-
-
-status = mark(area) #текущее состояние
-color = "black" # цвет шашек для бота
-
-actual_moves = []
-taking = []
-#necessarily = False # условие для взятия
-nes_take = [] # анализ поля, откуда проверять дальнейшее взятие
-#transfer = False
-queen = []
-queen_take = []
-
-
-
-
-##### Сделать анализ дальнейших взятий
-
-
-
-
-test_move = [[0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 1, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 2, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]]
-
-
-#Поиск текущих возможных ходов
-def moves_bot(position):
-        if color == "white":
-                for i in range(len(position)):
-                        for j in range(len(position[i])):
-                                if position[i][j] == 1:
-                                        if i - 1 >= 0 and j - 1 >= 0:
-                                                if position[i-1][j-1] == 0:
-                                                        actual_moves.append([i-1,j-1])
-
-                                                        matrixArea[i][j].append([i-1,j-1])
-
-                                                elif position[i-1][j-1] == 2:
-                                                        if i - 2 >= 0 and j - 2 >= 0:
-                                                                if position[i-2][j-2] == 0:
-                                                                        nes_take.append([i - 2, j - 2])
-                                                                        taking.append([i-2,j-2])
-
-                                                                        matrixArea[i][j].append([i - 2, j - 2])
-
-                                        if i - 1 >= 0 and j + 1 < 8:
-                                                if position[i-1][j+1] == 0:
-                                                        actual_moves.append([i-1,j+1])
-
-                                                        matrixArea[i][j].append([i - 1, j + 1])
-
-                                                elif position[i-1][j+1] == 2:
-                                                        if i - 2 >= 0 and j + 2 < 8:
-                                                                if position[i-2][j+2] == 0:
-                                                                        nes_take.append([i - 2, j + 2])
-                                                                        taking.append([i-2,j+2])
-
-                                                                        matrixArea[i][j].append([i - 2, j + 2])
-
-
-                                        # Проверка на возможность взятия назад
-                                        if i + 1 < 8 and j - 1 >= 0:
-                                                if position[i+1][j-1] == 2 or position[i+1][j-1] == 22:
-                                                        if i + 2 < 8 and j - 2 >= 0:
-                                                                if position[i+2][j-2] == 0:
-                                                                        taking.append([i+2,j-2])
-
-                                                                        matrixArea[i][j].append([i + 2, j - 2])
-
-                                        if i + 1 < 8 and j + 1 < 8:
-                                                if position[i+1][j+1] == 2 or position[i+1][j+1] == 22:
-                                                        if i + 2 < 8 and j + 2 < 8:
-                                                                if position[i+2][j+2] == 0:
-                                                                        taking.append([i+2,j+2])
-
-                                                                        matrixArea[i][j].append([i + 2, j + 2])
-
-                                elif position[i][j] == 11:
-                                        iD = i + 1
-                                        jD = j + 1
-                                        while iD != 8 and jD != 8:
-                                                if position[iD][jD] == 0:
-                                                        queen.append([iD,jD])
-
-                                                        matrixArea[i][j].append([iD, jD])
-
-                                                elif position[iD][jD] == 2 or position[iD][jD] == 22:
-                                                        if iD + 1 < 8 and jD + 1 < 8:
-                                                                if position[iD+1][jD+1] == 0:
-                                                                        queen_take.append([iD+1,jD+1])
-
-                                                                        matrixArea[i][j].append([iD+1, jD+1])
-
-                                                elif position[iD][jD] == 1 or position[iD][jD] == 11:
-                                                        break
-                                                iD+=1
-                                                jD+=1
-
-                                        iD = i - 1
-                                        jD = j - 1
-                                        while iD != -1 and jD != -1:
-                                                if position[iD][jD] == 0:
-                                                        queen.append([iD, jD])
-
-                                                        matrixArea[i][j].append([iD, jD])
-
-                                                elif position[iD][jD] == 2 or position[iD][jD] == 22:
-                                                        if iD - 1 >= 0 and jD - 1 >= 0:
-                                                                if position[iD - 1][jD - 1] == 0:
-                                                                        queen_take.append([iD - 1, jD - 1])
-
-                                                                        matrixArea[i][j].append([iD-1, jD-1])
-
-                                                elif position[iD][jD] == 1 or position[iD][jD] == 11:
-                                                        break
-                                                iD -= 1
-                                                jD -= 1
-
-                                        iD = i + 1
-                                        jD = j - 1
-                                        while iD != 8 and jD != -1:
-                                                if position[iD][jD] == 0:
-                                                        queen.append([iD, jD])
-
-                                                        matrixArea[i][j].append([iD, jD])
-
-                                                elif position[iD][jD] == 2 or position[iD][jD] == 22:
-                                                        if iD +1 < 8 and jD - 1 >= 0:
-                                                                if position[iD + 1][jD - 1] == 0:
-                                                                        queen_take.append([iD + 1, jD - 1])
-
-                                                                        matrixArea[i][j].append([iD+1, jD-1])
-
-                                                elif position[iD][jD] == 1 or position[iD][jD] == 11:
-                                                        break
-                                                iD += 1
-                                                jD -= 1
-
-                                        iD = i - 1
-                                        jD = j + 1
-                                        while iD != -1 and jD != 8:
-                                                if position[iD][jD] == 0:
-                                                        queen.append([iD, jD])
-
-                                                        matrixArea[i][j].append([iD, jD])
-
-                                                elif position[iD][jD] == 2 or position[iD][jD] == 22:
-                                                        if iD - 1 >= 0 and jD + 1 < 8:
-                                                                if position[iD - 1][jD + 1] == 0:
-                                                                        queen_take.append([iD - 1, jD + 1])
-
-                                                                        matrixArea[i][j].append([iD - 1, jD + 1])
-
-                                                elif position[iD][jD] == 1 or position[iD][jD] == 11:
-                                                        break
-                                                iD -= 1
-                                                jD += 1
-
-
-        if color == "black":
-                for i in range(len(position)):
-                        for j in range(len(position[i])):
-                                if position[i][j] == 2:
-                                        if i + 1 < 8 and j - 1 >= 0:
-                                                if position[i+1][j-1] == 0:
-                                                        ##Для кнопки
-                                                        actual_moves.append([i+1,j-1])
-                                                        # ##Для кнопки
-                                                        matrixArea[i][j].append([i+1,j-1])
-
-
-                                                elif position[i+1][j-1] == 1:
-                                                        if i + 2 < 8 and j - 2 >= 0:
-                                                                if position[i+2][j-2] == 0:
-                                                                        nes_take.append([i + 2, j - 2])
-                                                                        taking.append([i+2,j-2])
-
-                                                                        matrixArea[i][j].append([i+2,j-2])
-
-                                        if i + 1 < 8 and j + 1 < 8:
-                                                if position[i+1][j+1] == 0:
-                                                        actual_moves.append([i+1,j+1])
-
-                                                        matrixArea[i][j].append([i+1,j+1])
-
-                                                elif position[i+1][j+1] == 1:
-                                                        if i + 2 < 8 and j + 2 < 8:
-                                                                if position[i+2][j+2] == 0:
-                                                                        nes_take.append([i+2,j+2])
-                                                                        taking.append([i+2,j+2])
-
-                                                                        matrixArea[i][j].append([i+2,j+2])
-
-                                        # Проверка на возможность взятия назад
-                                        if i - 1 >= 0 and j - 1 >= 0:
-                                                if position[i-1][j-1] == 1 or position[i-1][j-1] == 11:
-                                                        if i - 2 >= 0 and j - 2 >= 0:
-                                                                if position[i-2][j-2] == 0:
-                                                                        taking.append([i-2,j-2])
-                                                                        matrixArea[i][j].append([i-2,j-2])
-
-                                        if i - 1 >= 0 and j + 1 < 8:
-                                                if position[i-1][j+1] == 1 or position[i-1][j+1] == 11:
-                                                        if i - 2 >= 0 and j + 2 < 8:
-                                                                if position[i-2][j+2] == 0:
-                                                                        taking.append([i-2,j+2])
-
-                                                                        matrixArea[i][j].append([i - 2, j + 2])
-                                elif position[i][j] == 22:
-                                        iD = i + 1
-                                        jD = j + 1
-                                        while iD != 8 and jD != 8:
-                                                if position[iD][jD] == 0:
-                                                        queen.append([iD, jD])
-
-                                                        matrixArea[i][j].append([iD, jD])
-
-                                                elif position[iD][jD] == 1 or position[iD][jD] == 11:
-                                                        if iD + 1 < 8 and jD + 1 < 8:
-                                                                if position[iD + 1][jD + 1] == 0:
-                                                                        queen_take.append([iD + 1, jD + 1])
-
-                                                                        matrixArea[i][j].append([iD + 1, jD + 1])
-
-                                                elif position[iD][jD] == 2 or position[iD][jD] == 22:
-                                                        break
-                                                iD += 1
-                                                jD += 1
-
-                                        iD = i - 1
-                                        jD = j - 1
-                                        while iD != -1 and jD != -1:
-                                                if position[iD][jD] == 0:
-                                                        queen.append([iD, jD])
-
-                                                        matrixArea[i][j].append([iD, jD])
-
-                                                elif position[iD][jD] == 1 or position[iD][jD] == 11:
-                                                        if iD - 1 >= 0 and jD - 1 >= 0:
-                                                                if position[iD - 1][jD - 1] == 0:
-                                                                        queen_take.append([iD - 1, jD - 1])
-
-                                                                        matrixArea[i][j].append([iD - 1, jD - 1])
-
-                                                elif position[iD][jD] == 2 or position[iD][jD] == 22:
-                                                        break
-                                                iD -= 1
-                                                jD -= 1
-
-                                        iD = i + 1
-                                        jD = j - 1
-                                        while iD != 8 and jD != -1:
-                                                if position[iD][jD] == 0:
-                                                        queen.append([iD, jD])
-
-                                                        matrixArea.append([iD, jD])
-
-                                                elif position[iD][jD] == 1 or position[iD][jD] == 11:
-                                                        if iD + 1 < 8 and jD - 1 >= 0:
-                                                                if position[iD + 1][jD - 1] == 0:
-                                                                        queen_take.append([iD + 1, jD - 1])
-
-                                                                        matrixArea[i][j].append([iD + 1, jD - 1])
-
-                                                elif position[iD][jD] == 2 or position[iD][jD] == 22:
-                                                        break
-                                                iD += 1
-                                                jD -= 1
-
-                                        iD = i - 1
-                                        jD = j + 1
-                                        while iD != -1 and jD != 8:
-                                                if position[iD][jD] == 0:
-                                                        queen.append([iD, jD])
-
-                                                        matrixArea[i][j].append([iD, jD])
-
-                                                elif position[iD][jD] == 1 or position[iD][jD] == 11:
-                                                        if iD - 1 >= 0 and jD + 1 < 8:
-                                                                if position[iD - 1][jD + 1] == 0:
-                                                                        queen_take.append([iD - 1, jD + 1])
-
-                                                                        matrixArea[i][j].append([iD - 1, jD + 1])
-
-                                                elif position[iD][jD] == 2 or position[iD][jD] == 22:
-                                                        break
-                                                iD -= 1
-                                                jD += 1
-
-
-
-#moves_bot(test_move)
-
-# for i in matrixArea:
-#         print(i)
-
-#print(actual_moves)
-# print(taking)
-
-# moves_bot(area)
-# print(actual_moves)
-# print(taking)
-# Тесты успешны
-
-# moves_bot(test_queen)
-# print(queen)
-# print(queen_take)
-# Тесты успешны
-
-game_area = [[0, 2, 0, 2, 0, 2, 0, 2],
-        [2, 0, 2, 0, 2, 0, 2, 0],
-        [0, 2, 0, 2, 0, 2, 0, 2],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 1, 0, 1, 0, 1, 0],
-        [0, 1, 0, 1, 0, 1, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0]]
-
-game_area = test_move
-
-# Без обязательного взятия
-
-def move_user(fr, to):
-        if abs(fr[0]-to[0]) == 1 and abs(fr[1]-to[1]) == 1:
-                iFr = fr[0]
-                jFr = fr[1]
-                iTo = to[0]
-                jTo = to[1]
-                game_area[iTo][jTo] = game_area[iFr][jFr]
-                game_area[iFr][jFr] = 0
-
-        elif abs(fr[0]-to[0]) == 2 and abs(fr[1]-to[1]) == 2:
-                iFr = fr[0]
-                jFr = fr[1]
-                iTo = to[0]
-                jTo = to[1]
-                game_area[iTo][jTo] = game_area[iFr][jFr]
-                game_area[iFr][jFr] = 0
-                game_area[abs((iTo+iFr))//2][abs((jTo+jFr))//2] = 0
-
-        else:
-                return False
-
-        return True
-
-# print(move_user([5,0],[3,2]))
-# for i in game_area:
-#          print(i)
-
-
-def move_bot(fr, to):
-        if abs(fr[0]-to[0]) == 1 and abs(fr[1]-to[1]) == 1:
-                iFr = fr[0]
-                jFr = fr[1]
-                iTo = to[0]
-                jTo = to[1]
-                game_area[iTo][jTo] = game_area[iFr][jFr]
-                game_area[iFr][jFr] = 0
-
-
-        elif abs(fr[0]-to[0]) == 2 and abs(fr[1]-to[1]) == 2:
-                iFr = fr[0]
-                jFr = fr[1]
-                iTo = to[0]
-                jTo = to[1]
-                game_area[iTo][jTo] = game_area[iFr][jFr]
-                game_area[iFr][jFr] = 0
-                game_area[abs((iTo+iFr))//2][abs((jTo+jFr))//2] = 0
-
-        if iTo == 0:
-                game_area[iTo][jTo] = 11
-
-        if iTo == 7:
-                game_area[iTo][jTo] = 22
-
-        return True
-
-# Без учёта условия обязательного взятия
-
-def bot_level_1(matrixArea):
-        forLevel1 = []
-        if taking == []:
-                for i in range(len(matrixArea)):
-                        for j in range(len(matrixArea[i])):
-                                if matrixArea[i][j] != []:
-                                        forLevel1.append([[i,j],matrixArea[i][j]])
-
-                hod = random.choice(forLevel1)
-                fr = hod[0]
-                to = random.choice(hod[1])
-                move_bot(fr,to)
-
-# bot_level_1(matrixArea)
-#
-# for i in game_area:
-#         print(i)
-
-
-
-
+import tkinter, time
+from modules.visual import checkers_board, draw,draw_reversed
+from modules.bot import moves_bot, bot_level_1, mark
+from global_variables import COORDS, MATRIX_AREA, TAKING, AREA
+WHITE_CHECKERS = []
+BLACK_CHECKERS = []
+DONE = False
+QUEEN_Q = False
+TAKEE = False
+BLACK = False
+WHITE = False
+STARTED = False
+FR = []
+CHOSE = False
+
+
+#Step 1. создание игрового поля
+WINDOW = tkinter.Tk()
+WINDOW.geometry('500x700')
+CANVAS = tkinter.Canvas(WINDOW, height=500, width=500)
+label1 = tkinter.Label(text="Нажми левой кнопкой мыши на шашку, двойное нажатие на пустое поле - туда поставится шашка ")
+label1.pack()
+CANVAS.pack()
+WINDOW.title("Шашки")
+
+# Функция помещения шашек со списка на картинку
+
+def motion1(event):
+    global CHOSE, AREA, MATRIX_AREA, TAKEE, COORDS, TAKING, FR
+    MATRIX_AREA = moves_bot(AREA, "white")[0]
+    TAKING = moves_bot(AREA, "white")[1]
+    for it in range(len(TAKING)):
+        for jt in range(len(TAKING[it])):
+            if TAKING[it][jt]!=[]:
+                TAKEE = True
+                break
+    for i in range(len(COORDS)):
+        for j in range(len(COORDS[i])):
+            if abs((COORDS[i][j][0] + COORDS[i][j][2]) // 2 - event.x) < 25 and abs((COORDS[i][j][1] + COORDS[i][j][3]) // 2 - event.y) < 25:
+                if(AREA[i][j] == 1 and not CHOSE and not TAKEE):
+                    print("taking: ", TAKING)
+                    if MATRIX_AREA[i][j] != []:
+                        CHOSE = True
+                        FR.append([i, j])
+                        FR.append(MATRIX_AREA[i][j])
+                        print(FR)
+                        AREA[i][j] = 0
+                elif(AREA[i][j] == 11 and not CHOSE and not TAKEE):
+                    if MATRIX_AREA[i][j] != []:
+                        global QUEEN_Q
+                        QUEEN_Q = True
+                        CHOSE = True
+                        FR.append([i, j])
+                        FR.append(MATRIX_AREA[i][j])
+                        print(FR)
+                        AREA[i][j] = 0
+                elif AREA[i][j] == 1 and not CHOSE and TAKEE:
+                    if TAKING[i][j]!=[]:
+                        CHOSE = True
+                        FR.append([i, j])
+                        FR.append(TAKING[i][j])
+                        print(FR)
+                        AREA[i][j]=0
+                elif AREA[i][j] == 11 and not CHOSE and TAKEE:
+                    if TAKING[i][j]!=[]:
+                        QUEEN_Q = True
+                        CHOSE = True
+                        FR.append([i, j])
+                        FR.append(TAKING[i][j])
+                        print(FR)
+                        AREA[i][j] = 0
+    print(QUEEN_Q, TAKEE, CHOSE)
+
+def motion2(event):
+    global CHOSE, DONE, TAKEE, QUEEN_Q, FR, AREA
+    for i in range(len(COORDS)):
+        for j in range(len(COORDS[i])):
+            if abs((COORDS[i][j][0] + COORDS[i][j][2]) // 2 - event.x) < 25 and abs((COORDS[i][j][1] + COORDS[i][j][3]) // 2 - event.y) < 25:
+                if TAKEE and [i, j] in FR[-1] and CHOSE and QUEEN_Q:
+                    if FR[0][0] < i and FR[0][1] < j:
+                        for k in range(FR[0][0], i):
+                            for t in range(FR[0][1], j):
+                                if k-t == i-j and AREA[k][t] == 2 or AREA[k][t] == 22:
+                                    AREA[k][t] = 0
+                                    break
+                    elif FR[0][0] < i and FR[0][1] > j:
+                        for k in range(FR[0][0], i):
+                            for t in range(j, FR[0][1]):
+                                if k + t == i + j and AREA[k][t] == 2 or AREA[k][t] == 22:
+                                    AREA[k][t] = 0
+                                    break
+                    elif FR[0][0] > i and FR[0][1] < j:
+                        for k in range(i,FR[0][0]):
+                            for t in range(FR[0][1], j):
+                                if k + t == i + j and AREA[k][t] == 2 or AREA[k][t] == 22:
+                                    AREA[k][t] = 0
+                                    break
+                    elif FR[0][0] > i and FR[0][1] > j:
+                        for k in range(i, FR[0][0]):
+                            for t in range(j, FR[0][1]):
+                                if k - t == i - j and AREA[k][t] == 2 or AREA[k][t] == 22:
+                                    AREA[k][t] = 0
+                                    break
+                    print(i, j)
+                    AREA[i][j] = 11
+                    global DONE
+                    DONE = True
+                    TAKING = moves_bot(AREA,"white")[1]
+                    if TAKING[i][j] != []:
+                        TAKEE = False
+                        QUEEN_Q = False
+                        DONE = False
+                        CHOSE = False
+                        FR = []
+                        CANVAS.update()
+
+                elif [i,j] in FR[-1] and CHOSE and TAKEE:
+                    if i == 0:
+                        AREA[i][j] = 11
+                        AREA[(i + FR[0][0]) // 2][(j + FR[0][1]) // 2] = 0
+                        DONE = True
+                    else:
+                        AREA[i][j] = 1
+                        AREA[(i + FR[0][0]) // 2][(j + FR[0][1]) // 2] = 0
+                        DONE = True
+                    TAKING = moves_bot(AREA, "white")[1]
+                    if TAKING[i][j] != []:
+                        TAKEE = False
+                        QUEEN_Q = False
+                        DONE = False
+                        CHOSE = False
+                        FR = []
+                        CANVAS.update()
+                elif [i,j] in FR[-1] and CHOSE and abs(i - FR[0][0]) == 1 and abs(j - FR[0][1]) == 1 and not QUEEN_Q:
+                    if i == 0:
+                        AREA[i][j] = 11
+                    else:
+                        AREA[i][j] = 1
+                    DONE = True
+
+                elif QUEEN_Q and [i, j] in FR[-1] and CHOSE:
+                    AREA[i][j]=11
+                    DONE = True
+                elif QUEEN_Q:
+                    AREA[FR[0][0]][FR[0][1]] = 11
+                    CHOSE = False
+                else:
+                    AREA[FR[0][0]][FR[0][1]] = 1
+                    CHOSE = False
+    CANVAS.update()
+
+def startedQ():
+    global STARTED
+    STARTED = True
+
+def finishedQ():
+    global STARTED
+    STARTED = False
+
+def blackQ():
+    global BLACK
+    BLACK = True
+
+def whiteQ():
+    global WHITE
+    WHITE = True
+
+buttons = []
+
+def choose_color():
+    global buttons
+    buttons.append(tkinter.Button(text = "Белые", command = lambda : [whiteQ(),startedQ()]))
+    buttons.append(tkinter.Button(text = "Чёрные", command = lambda : [blackQ(),startedQ()]))
+    buttons[-1].pack()
+    buttons[-2].pack()
+
+def get_back():
+    for i in buttons:
+        i.pack_forget()
+
+
+#создание поля
+checkers_board(CANVAS)
+buttons = []
+buttons.append(tkinter.Button(text = "Против бота", command = lambda :[buttons[0].pack_forget(), buttons[1].pack_forget(),choose_color()]))
+buttons.append(tkinter.Button(text = "Против друга"))
+buttons.append(tkinter.Button(text = "Назад", command=lambda : [get_back(),buttons[0].pack(), buttons[1].pack(), buttons[2].pack(), finishedQ()]))
+for item in buttons:
+    item.pack()
+while not STARTED and (not WHITE or not BLACK):
+    time.sleep(0.3)
+    CANVAS.update()
+if STARTED and WHITE:
+    checkers_board(CANVAS)
+    CANVAS.bind('<Button-1>', motion1)
+    CANVAS.bind('<Double-1>', motion2)
+    CANVAS.update()
+    while mark(AREA) == "Null" and STARTED:
+        CANVAS.delete("all")
+        TAKEE = False
+        take_again = False
+        QUEEN_Q = False
+        DONE = False
+        CHOSE = False
+        checkers_board(CANVAS)
+        CANVAS.update()
+        draw(AREA, CANVAS)
+        print(WHITE_CHECKERS)
+        CANVAS.update()
+        while not DONE:
+            time.sleep(0.3)
+            draw(AREA, CANVAS)
+            CANVAS.update()
+        FR = []
+        CANVAS.delete("all")
+        checkers_board(CANVAS)
+        CANVAS.update()
+        draw(AREA, CANVAS)
+        time.sleep(0.3)
+        print("Сейчас ходит бот")
+        CANVAS.update()
+        time.sleep(0.5)
+        bot_level_1(AREA)
+        print("Бот походил")
+        draw(AREA, CANVAS)
+        CANVAS.update()
+    print(mark(AREA))
+elif STARTED and BLACK:
+    checkers_board(CANVAS)
+    CANVAS.bind('<Button-1>', motion1)
+    CANVAS.bind('<Double-1>', motion2)
+    CANVAS.update()
+    draw_reversed(AREA, CANVAS)
+    while mark(AREA) == "Null" and STARTED:
+        CANVAS.delete("all")
+        checkers_board(CANVAS)
+        draw_reversed(AREA, CANVAS)
+        CANVAS.update()
+        time.sleep(0.3)
+        print("Сейчас ходит бот")
+        bot_level_1(AREA)
+        print("Бот походил")
+        CANVAS.delete("all")
+        checkers_board(CANVAS)
+        draw_reversed(AREA, CANVAS)
+        CANVAS.update()
+        take_again = False
+        TAKEE = False
+        QUEEN_Q = False
+        DONE = False
+        CHOSE = False
+        checkers_board(CANVAS)
+        CANVAS.update()
+        draw_reversed(AREA, CANVAS)
+        CANVAS.update()
+        while not DONE:
+            time.sleep(0.3)
+            draw_reversed(AREA, CANVAS)
+            CANVAS.update()
+        CANVAS.update()
+        FR = []
+
+WINDOW.mainloop()
