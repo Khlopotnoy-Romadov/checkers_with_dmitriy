@@ -266,3 +266,4 @@ def draw_reversed(lst, CANVAS):
                                         COORDS[i][j][3] - 5, outline="red", fill="yellow", tags="yellow")
                 w_c.append(ci)
     CANVAS.update()
+    
