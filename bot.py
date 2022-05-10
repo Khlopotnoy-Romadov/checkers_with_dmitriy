@@ -524,8 +524,6 @@ def take_go(area, iT = "Null", jT = "Null"):
     count = 0
     isStop = True
     if iT != "Null":
-        print(iT, jT)
-        print(taking[iT][jT])
         if taking[iT][jT] != []:
             take = taking[iT][jT][0]
             iTo = take[0]
