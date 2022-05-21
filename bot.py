@@ -1,6 +1,7 @@
 import time, random
 
 def moves_bot(position, color):
+    '''Функция, ищущая возможные ходы для всех шашек одного цвета.'''
     matrixArea = [[[], [], [], [], [], [], [], []],
                   [[], [], [], [], [], [], [], []],
                   [[], [], [], [], [], [], [], []],
@@ -461,8 +462,10 @@ def moves_bot(position, color):
 
 
 def move_bot(fr, to, area):
+    '''Функция, делающая ход бота.'''
     if abs(fr[0] - to[0]) == 1 and abs(fr[1] - to[1]) == 1:
-        shape = area[fr[0]][fr[1]];
+        shape = area[fr[0]][fr[1]]
+        print(to)
         if shape == 1 and to[0] == 0:
             shape = 11
         elif shape == 2 and to[0] == 7:
@@ -474,10 +477,9 @@ def move_bot(fr, to, area):
         area[iTo][jTo] = shape
         area[iFr][jFr] = 0
 
-
-
     elif abs(fr[0] - to[0]) == 2 and abs(fr[1] - to[1]) == 2:
-        shape = area[fr[0]][fr[1]];
+        print(to)
+        shape = area[fr[0]][fr[1]]
         if shape == 1 and to[0] == 0:
             shape = 11
         elif shape == 2 and to[0] == 7:
@@ -498,11 +500,11 @@ def move_bot(fr, to, area):
 
     return True
 
-# Функция бота 1 уровня, делающего обязательные взятия и рандомные ходы
 def bot_level_1(area):
+    '''Функция бота 1 уровня, делающего обязательные взятия и рандомные ходы.'''
     forLevel1 = []
-    isTake = False
-    ask = take_go(area)
+    count = 0
+    ask = take_go(area,count)
 
     if ask == "No":
         matrixArea = moves_bot(area, "black")[0]
@@ -512,27 +514,33 @@ def bot_level_1(area):
                     forLevel1.append([[i, j], matrixArea[i][j]])
             print(matrixArea[i])
         hod = random.choice(forLevel1)
-        print(hod)
+        # print(hod)
         fr1 = hod[0]
         to1 = random.choice(hod[1])
         move_bot(fr1, to1, area)
 
-# Функция для обязательного взятия
-def take_go(area, iT = "Null", jT = "Null"):
+def take_go(area,count, iT = "Null", jT = "Null"):
+    '''Функция для обязательного взятия.'''
+    isBreak = False
     matrixArea = moves_bot(area, "black")[0]
     taking = moves_bot(area, "black")[1]
-    count = 0
+    inCount = count
     isStop = True
     if iT != "Null":
         if taking[iT][jT] != []:
             take = taking[iT][jT][0]
             iTo = take[0]
             jTo = take[1]
-            area[iTo][jTo] = area[iT][jT]
+            shape = area[iT][jT]
+            if shape == 1 and iTo == 0:
+                shape = 11
+            elif shape == 2 and iTo == 7:
+                shape = 22
+            area[iTo][jTo] = shape
             area[iT][jT] = 0
             area[abs((iTo + iT)) // 2][abs((jTo + jT)) // 2] = 0
             isStop = False
-            count += 1
+            inCount += 1
             iT = iTo
             jT = jTo
     else:
@@ -542,22 +550,30 @@ def take_go(area, iT = "Null", jT = "Null"):
                     take = taking[i][j][0]
                     iTo = take[0]
                     jTo = take[1]
-                    area[iTo][jTo] = area[i][j]
+                    shape = area[i][j]
+                    if shape == 1 and iTo == 0:
+                        shape = 11
+                    elif shape == 2 and iTo == 7:
+                        shape = 22
+                    area[iTo][jTo] = shape
                     area[i][j] = 0
                     area[abs((iTo + i)) // 2][abs((jTo + j)) // 2] = 0
                     isStop = False
-                    count += 1
+                    inCount += 1
                     iT = iTo
                     jT = jTo
+                    isBreak = True
                     break
-
-    if isStop and count == 0:
+            if isBreak:
+                break
+    print(inCount)
+    if isStop and inCount == 0:
         # Взятий не было
         return "No"
-    elif isStop and count != 0:
+    elif isStop and inCount != 0:
         # Взятия были
         return "Yes"
-    elif not isStop and count != 0:
+    elif not isStop and inCount != 0:
         # Пытаемся продолжить брать
         for i in range(len(taking)):
             for j in range(len(taking[i])):
@@ -565,9 +581,10 @@ def take_go(area, iT = "Null", jT = "Null"):
         for i in range(len(matrixArea)):
             for j in range(len(matrixArea[i])):
                 matrixArea[i][j] = []
-        take_go(area, iT, jT)
+        take_go(area,inCount, iT, jT)
 
-def mark(position):
+def mark(position, color):
+    '''Функция оценки положения шашек.'''
     winWhite = False
     winBlack = False
     for i in range(len(position)):
@@ -575,8 +592,12 @@ def mark(position):
             winWhite = True
         if position[i].count(2) != 0 or position[i].count(22) != 0:
             winBlack = True
-    if winWhite and not winBlack:
+    if winWhite and not winBlack and color == "white":
         return "Белые победили"
-    elif not winWhite and winBlack:
+    elif not winWhite and winBlack and color == "white":
         return "Чёрные победили"
+    elif winWhite and not winBlack and color == "black":
+        return "Чёрные победили"
+    elif not winWhite and winBlack and color == "black":
+        return "Белые победили"
     return "Null"

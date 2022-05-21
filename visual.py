@@ -3,6 +3,7 @@ from modules.bot import moves_bot
 
 
 def checkers_board(canvas):
+    '''Функция создания доски'''
     canvas.delete("all")
     # ---------------------
     # COLUMN 1
@@ -231,6 +232,7 @@ def checkers_board(canvas):
 
 
 def draw(lst, CANVAS):
+    '''Функция, преобразующая матрицу в расстановку шашек на поле'''
     CANVAS.update()
     w_c = []
     b_c = []
@@ -250,6 +252,7 @@ def draw(lst, CANVAS):
     CANVAS.update()
 
 def draw_reversed(lst, CANVAS):
+    '''Функция, аналогичная функции draw, но для случая игры за чёрных'''
     w_c = []
     b_c = []
     for i in range(len(lst)):
@@ -266,4 +269,3 @@ def draw_reversed(lst, CANVAS):
                                         COORDS[i][j][3] - 5, outline="red", fill="yellow", tags="yellow")
                 w_c.append(ci)
     CANVAS.update()
-    

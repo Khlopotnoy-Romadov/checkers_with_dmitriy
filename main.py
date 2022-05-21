@@ -23,9 +23,8 @@ label1.pack()
 CANVAS.pack()
 WINDOW.title("Шашки")
 
-# Функция помещения шашек со списка на картинку
-
 def motion1(event):
+    '''Функция, с помощью которой можно выбрать шашку.'''
     global CHOSE, AREA, MATRIX_AREA, TAKEE, COORDS, TAKING, FR
     MATRIX_AREA = moves_bot(AREA, "white")[0]
     TAKING = moves_bot(AREA, "white")[1]
@@ -38,12 +37,12 @@ def motion1(event):
         for j in range(len(COORDS[i])):
             if abs((COORDS[i][j][0] + COORDS[i][j][2]) // 2 - event.x) < 25 and abs((COORDS[i][j][1] + COORDS[i][j][3]) // 2 - event.y) < 25:
                 if(AREA[i][j] == 1 and not CHOSE and not TAKEE):
-                    print("taking: ", TAKING)
+                    # print("taking: ", TAKING)
                     if MATRIX_AREA[i][j] != []:
                         CHOSE = True
                         FR.append([i, j])
                         FR.append(MATRIX_AREA[i][j])
-                        print(FR)
+                        # print(FR)
                         AREA[i][j] = 0
                 elif(AREA[i][j] == 11 and not CHOSE and not TAKEE):
                     if MATRIX_AREA[i][j] != []:
@@ -52,14 +51,14 @@ def motion1(event):
                         CHOSE = True
                         FR.append([i, j])
                         FR.append(MATRIX_AREA[i][j])
-                        print(FR)
+                        # print(FR)
                         AREA[i][j] = 0
                 elif AREA[i][j] == 1 and not CHOSE and TAKEE:
                     if TAKING[i][j]!=[]:
                         CHOSE = True
                         FR.append([i, j])
                         FR.append(TAKING[i][j])
-                        print(FR)
+                        # print(FR)
                         AREA[i][j]=0
                 elif AREA[i][j] == 11 and not CHOSE and TAKEE:
                     if TAKING[i][j]!=[]:
@@ -67,11 +66,12 @@ def motion1(event):
                         CHOSE = True
                         FR.append([i, j])
                         FR.append(TAKING[i][j])
-                        print(FR)
+                        # print(FR)
                         AREA[i][j] = 0
-    print(QUEEN_Q, TAKEE, CHOSE)
+    # print(QUEEN_Q, TAKEE, CHOSE)
 
 def motion2(event):
+    '''Функцию, с помощью которой можно переместить шашку.'''
     global CHOSE, DONE, TAKEE, QUEEN_Q, FR, AREA
     for i in range(len(COORDS)):
         for j in range(len(COORDS[i])):
@@ -150,24 +150,29 @@ def motion2(event):
     CANVAS.update()
 
 def startedQ():
+    '''Функция, которая начинает игру'''
     global STARTED
     STARTED = True
 
 def finishedQ():
+    '''Функция, которая заканчивает игру'''
     global STARTED
     STARTED = False
 
 def blackQ():
+    '''Функция, которая говорит, что данные фигуры чёрные'''
     global BLACK
     BLACK = True
 
 def whiteQ():
+    '''Функция, которая говорит, что данные фигуры белые'''
     global WHITE
     WHITE = True
 
 buttons = []
 
 def choose_color():
+    '''Функция, позволяющая сделать выбор цвета'''
     global buttons
     buttons.append(tkinter.Button(text = "Белые", command = lambda : [whiteQ(),startedQ()]))
     buttons.append(tkinter.Button(text = "Чёрные", command = lambda : [blackQ(),startedQ()]))
@@ -175,16 +180,16 @@ def choose_color():
     buttons[-2].pack()
 
 def get_back():
+    "Функция, которая сделать шаг назад в меню."
     for i in buttons:
         i.pack_forget()
 
 
-#создание поля
+#процесс игры
 checkers_board(CANVAS)
 buttons = []
-buttons.append(tkinter.Button(text = "Против бота", command = lambda :[buttons[0].pack_forget(), buttons[1].pack_forget(),choose_color()]))
-buttons.append(tkinter.Button(text = "Против друга"))
-buttons.append(tkinter.Button(text = "Назад", command=lambda : [get_back(),buttons[0].pack(), buttons[1].pack(), buttons[2].pack(), finishedQ()]))
+buttons.append(tkinter.Button(text = "Против бота", command = lambda :[buttons[0].pack_forget(), buttons[1].pack(),choose_color()]))
+buttons.append(tkinter.Button(text = "Назад", command=lambda : [get_back(),buttons[0].pack(), buttons[1].pack(), finishedQ()]))
 for item in buttons:
     item.pack()
 while not STARTED and (not WHITE or not BLACK):
@@ -195,7 +200,7 @@ if STARTED and WHITE:
     CANVAS.bind('<Button-1>', motion1)
     CANVAS.bind('<Double-1>', motion2)
     CANVAS.update()
-    while mark(AREA) == "Null" and STARTED:
+    while mark(AREA, "white") == "Null" and STARTED:
         CANVAS.delete("all")
         TAKEE = False
         take_again = False
@@ -220,18 +225,21 @@ if STARTED and WHITE:
         print("Сейчас ходит бот")
         CANVAS.update()
         time.sleep(0.5)
+        if mark(AREA, "white") != "Null":
+            WINDOW.destroy()
+            print(mark(AREA, "white"))
+            break
         bot_level_1(AREA)
         print("Бот походил")
         draw(AREA, CANVAS)
         CANVAS.update()
-    print(mark(AREA))
 elif STARTED and BLACK:
     checkers_board(CANVAS)
     CANVAS.bind('<Button-1>', motion1)
     CANVAS.bind('<Double-1>', motion2)
     CANVAS.update()
     draw_reversed(AREA, CANVAS)
-    while mark(AREA) == "Null" and STARTED:
+    while mark(AREA, "black") == "Null" and STARTED:
         CANVAS.delete("all")
         checkers_board(CANVAS)
         draw_reversed(AREA, CANVAS)
@@ -253,11 +261,20 @@ elif STARTED and BLACK:
         CANVAS.update()
         draw_reversed(AREA, CANVAS)
         CANVAS.update()
+        if mark(AREA, "black") != "Null":
+            WINDOW.destroy()
+            print(mark(AREA, "black"))
+            break
         while not DONE:
             time.sleep(0.3)
             draw_reversed(AREA, CANVAS)
             CANVAS.update()
         CANVAS.update()
         FR = []
+WINDOW.destroy()
+if BLACK:
+    print(mark(AREA, "black"))
+else:
+    print(mark(AREA, "white"))
 
 WINDOW.mainloop()
