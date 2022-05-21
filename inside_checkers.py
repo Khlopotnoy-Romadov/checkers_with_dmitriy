@@ -541,7 +541,12 @@ def take_go(iT = "Null", jT = "Null"):
             take = taking[iT][jT][0]
             iTo = take[0]
             jTo = take[1]
-            area[iTo][jTo] = area[iT][jT]
+            shape = area[iT][jT]
+            if shape == 1 and iTo == 0:
+                shape = 11
+            elif shape == 2 and iTo == 7:
+                shape = 22
+            area[iTo][jTo] = shape
             area[iT][jT] = 0
             area[abs((iTo + iT)) // 2][abs((jTo + jT)) // 2] = 0
             isStop = False
@@ -556,7 +561,12 @@ def take_go(iT = "Null", jT = "Null"):
                     take = taking[i][j][0]
                     iTo = take[0]
                     jTo = take[1]
-                    area[iTo][jTo] = area[i][j]
+                    shape = area[i][j]
+                    if shape == 1 and iTo == 0:
+                        shape = 11
+                    elif shape == 2 and iTo == 7:
+                        shape = 22
+                    area[iTo][jTo] = shape
                     area[i][j] = 0
                     area[abs((iTo + i)) // 2][abs((jTo + j)) // 2] = 0
                     isStop = False
