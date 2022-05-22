@@ -326,7 +326,7 @@ def moves_bot(position, color):
                             else:
                                 break
 
-                        elif position[iD][jD] == 1 or position[iD][jD] == 11:
+                        elif position[iD][jD] == 2 or position[iD][jD] == 22:
                             break
 
                     iD = i - 1
@@ -369,7 +369,7 @@ def moves_bot(position, color):
                             else:
                                 break
 
-                        elif position[iD][jD] == 1 or position[iD][jD] == 11:
+                        elif position[iD][jD] == 2 or position[iD][jD] == 22:
                             break
 
 
@@ -413,7 +413,7 @@ def moves_bot(position, color):
                             else:
                                 break
 
-                        elif position[iD][jD] == 1 or position[iD][jD] == 11:
+                        elif position[iD][jD] == 2 or position[iD][jD] == 22:
                             break
 
                     iD = i - 1
@@ -456,20 +456,16 @@ def moves_bot(position, color):
                             else:
                                 break
 
-                        elif position[iD][jD] == 1 or position[iD][jD] == 11:
+                        elif position[iD][jD] == 2 or position[iD][jD] == 22:
                             break
     return [matrixArea, taking]
 
 
 def move_bot(fr, to, area):
     '''Функция, делающая ход бота.'''
-    if abs(fr[0] - to[0]) == 1 and abs(fr[1] - to[1]) == 1:
+    print()
+    if area[fr[0]][fr[1]] == 11 or area[fr[0]][fr[1]] == 22:
         shape = area[fr[0]][fr[1]]
-        print(to)
-        if shape == 1 and to[0] == 0:
-            shape = 11
-        elif shape == 2 and to[0] == 7:
-            shape = 22
         iFr = fr[0]
         jFr = fr[1]
         iTo = to[0]
@@ -477,26 +473,35 @@ def move_bot(fr, to, area):
         area[iTo][jTo] = shape
         area[iFr][jFr] = 0
 
-    elif abs(fr[0] - to[0]) == 2 and abs(fr[1] - to[1]) == 2:
-        print(to)
-        shape = area[fr[0]][fr[1]]
-        if shape == 1 and to[0] == 0:
-            shape = 11
-        elif shape == 2 and to[0] == 7:
-            shape = 22
-        iFr = fr[0]
-        jFr = fr[1]
-        iTo = to[0]
-        jTo = to[1]
-        area[iTo][jTo] = shape
-        area[iFr][jFr] = 0
-        area[abs((iTo + iFr)) // 2][abs((jTo + jFr)) // 2] = 0
+    else:
+        if abs(fr[0] - to[0]) == 1 and abs(fr[1] - to[1]) == 1:
+            shape = area[fr[0]][fr[1]]
+            print(to)
+            if shape == 1 and to[0] == 0:
+                shape = 11
+            elif shape == 2 and to[0] == 7:
+                shape = 22
+            iFr = fr[0]
+            jFr = fr[1]
+            iTo = to[0]
+            jTo = to[1]
+            area[iTo][jTo] = shape
+            area[iFr][jFr] = 0
 
-    if iTo == 0:
-        area[iTo][jTo] = 11
-
-    if iTo == 7:
-        area[iTo][jTo] = 22
+        elif abs(fr[0] - to[0]) == 2 and abs(fr[1] - to[1]) == 2:
+            print(to)
+            shape = area[fr[0]][fr[1]]
+            if shape == 1 and to[0] == 0:
+                shape = 11
+            elif shape == 2 and to[0] == 7:
+                shape = 22
+            iFr = fr[0]
+            jFr = fr[1]
+            iTo = to[0]
+            jTo = to[1]
+            area[iTo][jTo] = shape
+            area[iFr][jFr] = 0
+            area[abs((iTo + iFr)) // 2][abs((jTo + jFr)) // 2] = 0
 
     return True
 
@@ -504,7 +509,9 @@ def bot_level_1(area):
     '''Функция бота 1 уровня, делающего обязательные взятия и рандомные ходы.'''
     forLevel1 = []
     count = 0
+    print("I am here")
     ask = take_go(area,count)
+    print("I am here")
 
     if ask == "No":
         matrixArea = moves_bot(area, "black")[0]
@@ -514,7 +521,7 @@ def bot_level_1(area):
                     forLevel1.append([[i, j], matrixArea[i][j]])
             print(matrixArea[i])
         hod = random.choice(forLevel1)
-        # print(hod)
+        # print("hod = ",hod)
         fr1 = hod[0]
         to1 = random.choice(hod[1])
         move_bot(fr1, to1, area)
@@ -522,8 +529,11 @@ def bot_level_1(area):
 def take_go(area,count, iT = "Null", jT = "Null"):
     '''Функция для обязательного взятия.'''
     isBreak = False
+    print("before moves bot")
     matrixArea = moves_bot(area, "black")[0]
+    print("after first moves bot")
     taking = moves_bot(area, "black")[1]
+    print("after second moves bot")
     inCount = count
     isStop = True
     if iT != "Null":
@@ -566,7 +576,6 @@ def take_go(area,count, iT = "Null", jT = "Null"):
                     break
             if isBreak:
                 break
-    print(inCount)
     if isStop and inCount == 0:
         # Взятий не было
         return "No"
