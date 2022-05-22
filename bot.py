@@ -508,10 +508,8 @@ def move_bot(fr, to, area):
 def bot_level_1(area):
     '''Функция бота 1 уровня, делающего обязательные взятия и рандомные ходы.'''
     forLevel1 = []
-    count = 0
-    print("I am here")
-    ask = take_go(area,count)
-    print("I am here")
+    ask = take_go(area)
+    print(ask)
 
     if ask == "No":
         matrixArea = moves_bot(area, "black")[0]
@@ -526,15 +524,12 @@ def bot_level_1(area):
         to1 = random.choice(hod[1])
         move_bot(fr1, to1, area)
 
-def take_go(area,count, iT = "Null", jT = "Null"):
+def take_go(area, iT = "Null", jT = "Null"):
     '''Функция для обязательного взятия.'''
     isBreak = False
-    print("before moves bot")
     matrixArea = moves_bot(area, "black")[0]
-    print("after first moves bot")
     taking = moves_bot(area, "black")[1]
-    print("after second moves bot")
-    inCount = count
+    count = 0
     isStop = True
     if iT != "Null":
         if taking[iT][jT] != []:
@@ -550,39 +545,71 @@ def take_go(area,count, iT = "Null", jT = "Null"):
             area[iT][jT] = 0
             area[abs((iTo + iT)) // 2][abs((jTo + jT)) // 2] = 0
             isStop = False
-            inCount += 1
+            count += 1
             iT = iTo
             jT = jTo
     else:
         for i in range(len(taking)):
             for j in range(len(taking[i])):
-                if taking[i][j] != []:
+                print(taking[i][j])
+                if taking[i][j] != [] and (area[i][j] == 1 or area[i][j] == 2):
                     take = taking[i][j][0]
                     iTo = take[0]
                     jTo = take[1]
                     shape = area[i][j]
-                    if shape == 1 and iTo == 0:
+                    if iTo == 0:
                         shape = 11
-                    elif shape == 2 and iTo == 7:
+                    elif iTo == 7:
                         shape = 22
                     area[iTo][jTo] = shape
                     area[i][j] = 0
                     area[abs((iTo + i)) // 2][abs((jTo + j)) // 2] = 0
                     isStop = False
-                    inCount += 1
+                    count += 1
                     iT = iTo
                     jT = jTo
                     isBreak = True
                     break
+
+                if taking[i][j] != [] and (area[i][j] == 11 or area[i][j] == 22):
+                    print("Хочу взять")
+                    count+=1
+                    isStop = False
+                    take = taking[i][j][0]
+                    iTo = take[0]
+                    jTo = take[1]
+                    shape = area[i][j]
+                    area[iTo][jTo] = shape
+                    area[i][j] = 0
+                    countI = i
+                    countJ = j
+                    while countI != iTo and countJ != jTo:
+
+                        if (area[countI][countJ] == 11 or area[countI][countJ] == 1) and shape == 22:
+                            area[countI][countJ] = 0
+                            break
+                        elif (area[countI][countJ] == 22 or area[countI][countJ] == 2) and shape == 11:
+                            area[countI][countJ] = 0
+                            break
+                        if countI < iTo:
+                            countI += 1
+                        elif countI > iTo:
+                            countI -= 1
+                        if countJ < jTo:
+                            countJ += 1
+                        elif countJ > jTo:
+                            countJ -= 1
+                    isBreak = True
+                    break
             if isBreak:
                 break
-    if isStop and inCount == 0:
+    if isStop and count == 0:
         # Взятий не было
         return "No"
-    elif isStop and inCount != 0:
+    elif isStop and count != 0:
         # Взятия были
         return "Yes"
-    elif not isStop and inCount != 0:
+    elif not isStop and count != 0:
         # Пытаемся продолжить брать
         for i in range(len(taking)):
             for j in range(len(taking[i])):
@@ -590,7 +617,7 @@ def take_go(area,count, iT = "Null", jT = "Null"):
         for i in range(len(matrixArea)):
             for j in range(len(matrixArea[i])):
                 matrixArea[i][j] = []
-        take_go(area,inCount, iT, jT)
+        take_go(area, iT, jT)
 
 def mark(position, color):
     '''Функция оценки положения шашек.'''

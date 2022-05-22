@@ -2,6 +2,7 @@ import tkinter, time
 from modules.visual import checkers_board, draw,draw_reversed
 from modules.bot import moves_bot, bot_level_1, mark
 from global_variables import COORDS, MATRIX_AREA, TAKING, AREA
+
 WHITE_CHECKERS = []
 BLACK_CHECKERS = []
 DONE = False

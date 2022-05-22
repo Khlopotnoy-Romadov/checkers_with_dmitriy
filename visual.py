@@ -1,5 +1,4 @@
 from global_variables import COORDS
-from modules.bot import moves_bot
 
 
 def checkers_board(canvas):
